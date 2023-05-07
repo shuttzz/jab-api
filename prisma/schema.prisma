@@ -1,0 +1,64 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Parent {
+  id        String   @id @default(uuid()) @db.VarChar(36)
+  name      String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(150)
+  password  String   @db.VarChar(100)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  children  Kid[]
+
+  @@map("parents")
+}
+
+model Kid {
+  id        String     @id @default(uuid()) @db.VarChar(36)
+  name      String     @db.VarChar(100)
+  email     String     @unique @db.VarChar(150)
+  password  String     @db.VarChar(100)
+  createdAt DateTime   @default(now()) @map("created_at")
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  wallet    Wallet     @relation(fields: [walletId], references: [id])
+  walletId  String     @db.VarChar(36)
+  registers Register[]
+  parent    Parent     @relation(fields: [parentId], references: [id])
+  parentId  String     @db.VarChar(36)
+
+  @@map("children")
+}
+
+model Wallet {
+  id            String   @id @default(uuid()) @db.VarChar(36)
+  name          String   @db.VarChar(50)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  savedValue    Decimal  @map("saved_value") @db.Decimal(10, 2)
+  amountToSpend Decimal  @map("amount_to_spend") @db.Decimal(10, 2)
+  children      Kid[]
+
+  @@map("wallets")
+}
+
+model Register {
+  id          String   @id @default(uuid()) @db.VarChar(36)
+  description String   @db.VarChar(255)
+  value       Decimal  @db.Decimal(10, 2)
+  type        String   @db.VarChar(25)
+  kid         Kid      @relation(fields: [kidId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  kidId       String   @map("kid_id") @db.VarChar(36)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("registers")
+}
