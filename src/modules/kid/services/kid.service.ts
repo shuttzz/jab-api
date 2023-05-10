@@ -5,10 +5,15 @@ import { EntityNotFoundException } from '../../../shared/exceptions/entity-not-f
 import { InvalidConfirmationPasswordException } from '../../../shared/exceptions/invalid-confirmation-password.exception';
 import { KidRepository, KidResponse } from '../repositories/kid.respository';
 import { CreateKidDto } from '../dto/create-kid.dto';
+import { RegisterRepository } from '../../register/repositoires/register.repository';
+import { OneChildren } from '../../auth/controllers/parent.controller';
 
 @Injectable()
 export class KidService {
-  constructor(private kidRepository: KidRepository) {}
+  constructor(
+    private kidRepository: KidRepository,
+    private registerRepository: RegisterRepository,
+  ) {}
   async create(
     createKidDto: CreateKidDto,
     parentId: string,
@@ -36,15 +41,28 @@ export class KidService {
     return this.kidRepository.create(createKidDto, parentId);
   }
 
-  async findOne(id: string): Promise<KidResponse> {
-    const userFind = await this.kidRepository.findOne(id);
+  async findOne(id: string): Promise<OneChildren> {
+    const kid = await this.kidRepository.findOne(id);
+    const movimentations = await this.registerRepository.findLastFive(id);
 
-    if (!userFind) {
-      throw new EntityNotFoundException('Usuário não encontrado');
+    const response = {
+      id: kid.id,
+      name: kid.name,
+      savedValue: kid.wallet.savedValue,
+      amountToSpend: kid.wallet.amountToSpend,
+      movimentations: [],
+    };
+
+    if (movimentations) {
+      response.movimentations = movimentations.map((movimentation) => ({
+        id: movimentation.id,
+        createdAt: movimentation.createdAt,
+        value: movimentation.value,
+        type: movimentation.type,
+        description: movimentation.description,
+      }));
     }
 
-    delete userFind.password;
-
-    return userFind;
+    return response;
   }
 }

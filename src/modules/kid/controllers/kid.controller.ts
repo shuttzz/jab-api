@@ -14,6 +14,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { KidService } from '../services/kid.service';
 import { CreateKidDto } from '../dto/create-kid.dto';
 import { GetUser } from '../../auth/decorators/get-user.decorator';
+import { OneChildren } from '../../auth/controllers/parent.controller';
 
 @Controller('kids')
 export class KidController {
@@ -28,9 +29,9 @@ export class KidController {
     return this.kidService.create(createKidDto, user.id);
   }
 
-  @Get(':id')
+  @Get()
   @UseGuards(AuthGuard())
-  async findOne(@Param('id') id: string) {
-    return this.kidService.findOne(id);
+  async findOne(@GetUser() user: { id: string }): Promise<OneChildren> {
+    return this.kidService.findOne(user.id);
   }
 }

@@ -24,6 +24,7 @@ export type Children = {
 export type Movimentation = {
   id: string;
   createdAt: Date;
+  description: string;
   value: number;
   type: string;
 };

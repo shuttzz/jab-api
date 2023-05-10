@@ -9,6 +9,11 @@ export class WalletService {
   async guardar(value: number, id: string): Promise<void> {
     const walletFind = await this.repository.findOne(id);
 
+    if (walletFind.amountToSpend < value) {
+      throw new BadRequestException('Saldo insuficiente!');
+    }
+
+    walletFind.amountToSpend -= value;
     walletFind.savedValue += value;
 
     await this.repository.update(walletFind);
@@ -30,6 +35,7 @@ export class WalletService {
     }
 
     walletFind.savedValue -= value;
+    walletFind.amountToSpend += value;
 
     await this.repository.update(walletFind);
   }

@@ -82,6 +82,7 @@ export class ParentService {
         createdAt: movimentation.createdAt,
         value: movimentation.value,
         type: movimentation.type,
+        description: movimentation.description,
       }));
     }
 

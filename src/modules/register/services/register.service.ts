@@ -65,7 +65,7 @@ export class RegisterService {
 
   async findAll(kidId: string): Promise<OneChildren> {
     const kid = await this.kidRepository.findOne(kidId);
-    const movimentations = await this.registerRepository.findLastFive(kidId);
+    const movimentations = await this.registerRepository.findAll(kidId);
 
     const response = {
       id: kid.id,
@@ -79,6 +79,7 @@ export class RegisterService {
       response.movimentations = movimentations.map((movimentation) => ({
         id: movimentation.id,
         createdAt: movimentation.createdAt,
+        description: movimentation.description,
         value: movimentation.value,
         type: movimentation.type,
       }));
